@@ -1,0 +1,77 @@
+import speech_recognition as sr
+import pyttsx3
+import datetime
+import webbrowser
+import wikipedia
+
+# text-to-speech engine
+engine = pyttsx3.init()
+
+def speak(text):
+    engine.say(text)
+    engine.runAndWait()
+
+def listen_command():
+    r = sr.Recognizer()
+    with sr.Microphone() as source:
+        print("Listening...")
+        r.pause_threshold = 1
+        audio = r.listen(source)
+
+    try:
+        command = r.recognize_google(audio, language='en-in')
+        print("You said:", command)
+        return command.lower()
+    except:
+        speak("Sorry, I didn't understand. Please say that again.")
+        return ""
+
+def wish_user():
+    hour = int(datetime.datetime.now().hour)
+    if 0 <= hour < 12:
+        speak("Good morning!")
+    elif 12 <= hour < 18:
+        speak("Good afternoon!")
+    else:
+        speak("Good evening!")
+    speak("How can I help you?")
+
+def main():
+    wish_user()
+
+    while True:
+        command = listen_command()
+
+        if "hello" in command:
+            speak("Hello! How are you?")
+
+        elif "time" in command:
+            time = datetime.datetime.now().strftime("%I:%M %p")
+            speak(f"The time is {time}")
+
+        elif "date" in command:
+            date = datetime.datetime.now().strftime("%d %B %Y")
+            speak(f"Today's date is {date}")
+
+        elif "search" in command:
+            speak("What should I search on Google?")
+            query = listen_command()
+            webbrowser.open(f"https://www.google.com/search?q={query}")
+            speak("Searching on Google")
+
+        elif "wikipedia" in command:
+            speak("What should I search on Wikipedia?")
+            topic = listen_command()
+            result = wikipedia.summary(topic, sentences=2)
+            speak("According to Wikipedia")
+            speak(result)
+
+        elif "stop" in command or "exit" in command or "quit" in command:
+            speak("Goodbye! Have a nice day.")
+            break
+
+        elif command != "":
+            speak("Sorry, I can't do that yet. I am still learning.")
+
+if __name__ == "__main__":
+    main()
